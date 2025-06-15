@@ -11,7 +11,7 @@ if [ ! -d "$GTK_CONFIG_DIR" ]; then
   chown droidian:droidian "$GTK_CONFIG_DIR"
 fi
 
-cp usr/share/backgrounds/wallpaper_dlsos.png /usr/share/backgrounds/
+##cp usr/share/backgrounds/wallpaper_dlsos.png /usr/share/backgrounds/
 cp -f home/droidian/.config/gtk-4.0/gtk.css "$GTK_CONFIG_DIR/"
 
 chown droidian:droidian "$GTK_CONFIG_DIR/gtk.css"

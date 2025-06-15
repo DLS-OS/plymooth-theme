@@ -1,29 +1,29 @@
 #!/bin/bash
-
 set -e
 
-PLYMOUTH_THEME_NAME="dlsos"
-PLYMOUTH_THEME_PATH="/usr/share/plymouth/themes/$PLYMOUTH_THEME_NAME/$PLYMOUTH_THEME_NAME.plymouth"
+USER_HOME="/home/droidian"
+GTK_CONFIG_DIR="$USER_HOME/.config/gtk-3.0"
 WALLPAPER_PATH="/usr/share/backgrounds/wallpaper_dlsos.png"
 
-echo "[+] Configuration du thème Plymouth '$PLYMOUTH_THEME_NAME'..."
+# Créer le dossier de config s'il n'existe pas et copier le fichier gtk.css
+if [ ! -d "$GTK_CONFIG_DIR" ]; then
+  mkdir -p "$GTK_CONFIG_DIR"
+  chown droidian:droidian "$GTK_CONFIG_DIR"
+fi
+
+cp usr/share/backgrounds/wallpaper_dlsos.png /usr/share/backgrounds/
+cp -f home/droidian/.config/gtk-4.0/gtk.css "$GTK_CONFIG_DIR/"
+
+chown droidian:droidian "$GTK_CONFIG_DIR/gtk.css"
+
+# (La partie Plymouth reste la même)
+PLYMOUTH_THEME_NAME="dlsos"
+PLYMOUTH_THEME_PATH="/usr/share/plymouth/themes/$PLYMOUTH_THEME_NAME/$PLYMOUTH_THEME_NAME.plymouth"
+
 if [ -f "$PLYMOUTH_THEME_PATH" ]; then
     update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "$PLYMOUTH_THEME_PATH" 100
     update-alternatives --set default.plymouth "$PLYMOUTH_THEME_PATH"
     update-initramfs -u
-    echo "[+] Plymouth mis à jour avec succès."
-else
-    echo "[!] Fichier $PLYMOUTH_THEME_PATH introuvable."
-fi
-
-echo "[+] Configuration du fond d’écran..."
-# Appliquer le wallpaper si l'environnement permet les commandes gsettings
-if command -v gsettings >/dev/null && [ -n "$DBUS_SESSION_BUS_ADDRESS" ]; then
-    gsettings set org.gnome.desktop.background picture-uri "file://$WALLPAPER_PATH"
-    echo "[+] Fond d’écran mis à jour avec succès."
-else
-    echo "[!] gsettings non disponible ou DBUS_SESSION_BUS_ADDRESS non défini."
-    echo "    Vous devrez peut-être configurer manuellement le fond d’écran."
 fi
 
 exit 0

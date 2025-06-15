@@ -53,4 +53,8 @@ else
     echo "[!] Fichier $PLYMOUTH_THEME_PATH introuvable."
 fi
 
+# Redémarrer phosh pour appliquer la config GTK
+echo "[+] Redémarrage de phosh..."
+systemctl restart phosh || echo "[!] Impossible de redémarrer phosh. Vérifiez que le service existe."
+
 exit 0

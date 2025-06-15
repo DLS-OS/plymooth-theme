@@ -1,0 +1,48 @@
+name: Build & Release dlsos-plymouth-theme
+
+on:
+  push:
+    tags:
+      - 'v*'  # Déclenche le workflow à chaque nouveau tag de version (ex: v1.0)
+
+jobs:
+  build-deb:
+    name: Build DEB Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🛠️ Install packaging tools
+        run: sudo apt update && sudo apt install -y dpkg-dev
+
+      - name: 📦 Build .deb package
+        run: |
+          cd dlsos-plymouth-theme
+          chmod +x DEBIAN/postinst
+          dpkg-deb --build . ../dlsos-plymouth-theme.deb
+
+      - name: 📤 Upload .deb as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dlsos-plymouth-theme
+          path: dlsos-plymouth-theme.deb
+
+  release:
+    name: GitHub Release
+    needs: build-deb
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Download built artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dlsos-plymouth-theme
+
+      - name: 📦 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dlsos-plymouth-theme.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

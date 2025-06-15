@@ -1,48 +1,58 @@
-name: Build & Release dlsos-plymouth-theme
+name: Build and Release Debian Package
 
 on:
   push:
-    tags:
-      - 'v*'  # Déclenche le workflow à chaque nouveau tag de version (ex: v1.0)
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+env:
+  THEME_VERSION: 1.0.0  # Change si tu veux versionner dynamiquement
 
 jobs:
-  build-deb:
-    name: Build DEB Package
+  build-and-release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: 🛠️ Install packaging tools
-        run: sudo apt update && sudo apt install -y dpkg-dev
-
-      - name: 📦 Build .deb package
+      - name: Install build dependencies
         run: |
-          cd dlsos-plymouth-theme
-          chmod +x DEBIAN/postinst
-          dpkg-deb --build . ../dlsos-plymouth-theme.deb
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev
 
-      - name: 📤 Upload .deb as artifact
-        uses: actions/upload-artifact@v3
+      - name: Make postinst executable
+        run: |
+          chmod +x dlsos-plymouth-theme/DEBIAN/postinst
+
+      - name: Build Debian package
+        run: |
+          mkdir -p build/dlsos-plymouth-theme
+          cp -R dlsos-plymouth-theme/DEBIAN build/dlsos-plymouth-theme/
+          cp -R dlsos-plymouth-theme/usr build/dlsos-plymouth-theme/
+          cd build
+          dpkg-deb --build dlsos-plymouth-theme
+
+      - name: Rename package with version
+        run: |
+          cd build
+          mv dlsos-plymouth-theme.deb dlsos-plymouth-theme-v${{ env.THEME_VERSION }}.deb
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: dlsos-plymouth-theme
-          path: dlsos-plymouth-theme.deb
+          name: dlsos-plymouth-theme-deb
+          path: build/dlsos-plymouth-theme-v${{ env.THEME_VERSION }}.deb
 
-  release:
-    name: GitHub Release
-    needs: build-deb
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 📥 Download built artifact
-        uses: actions/download-artifact@v3
+      - name: Create GitHub Release (even without tag)
+        uses: softprops/action-gh-release@v2
         with:
-          name: dlsos-plymouth-theme
-
-      - name: 📦 Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: dlsos-plymouth-theme.deb
+          tag_name: main-${{ github.run_number }}
+          name: Release main build #${{ github.run_number }}
+          files: build/dlsos-plymouth-theme-v${{ env.THEME_VERSION }}.deb
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

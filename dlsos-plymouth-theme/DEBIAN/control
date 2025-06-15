@@ -1,0 +1,7 @@
+Package: dlsos-plymouth-theme
+Version: 1.0
+Section: themes
+Priority: optional
+Architecture: all
+Maintainer: DLS_OS
+Description: Plymooth Theme for DLS_OS

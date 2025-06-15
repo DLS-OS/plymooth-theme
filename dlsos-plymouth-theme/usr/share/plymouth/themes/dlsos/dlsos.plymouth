@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Dlsos
+Description=Dlsos plymouth theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/dlsos
+ScriptFile=/usr/share/plymouth/themes/dlsos/dlsos.script
